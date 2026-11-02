@@ -1,0 +1,57 @@
+Título: 
+
+História:
+Player é um jovem viajante a bordo da Starter-Mk1 cujo o objetivo é aventurar-se pelo espaço 
+coletando minérios em asteroides e explorar planetas do sistema estelar Khorus, onde um buraco negro super
+massivo XB/73 está no centro atraindo sistemas estelares inteiros ao redor ().
+
+Você vem de uma pequena colonia humana espacial do planetoide Karone.
+
+A história muda de acordo com as decisões
+
+O que falta?
+- adicionar sol, outros tipos de planetas e adicionar planeta Karone
+- radar vira item de upgrade, rover é compravel e melhorável
+- Sistema de rover e coleta
+- Sistema de "garagem" para vizualizar as Naves ()
+- Sistema de vida
+- Sistema de inimigos
+- Sistema de diálogos (baixa)
+- 
+
+Sistema de alinhamento com os asteroides:
+"mini game" para mirar no alvo para o rover descer em segurança
+se o jogador errar, pode danificar ou até perder o rover.
+no scanner informa as condiçoes de pouso, temperatura do planeta (Aqui entra a parte de RoverMaker, cada rover tem atributos)
+
+
+
+Sistema de defesa contra piratas espaciais (auto intitulados de SIMONS) {
+    - naves vermelhas com preto
+}
+
+Resistencia dos Argonautas
+
+Mecanica dos rover mineradores:
+Quando o rover pousar, inicia outro modo de jogo
+rover {
+    - velocidade
+    - vida util
+    - potencia de mandril
+    - vida de broca
+    - combustivel
+    - 
+}
+
+Naves e Veiculos:
+Starter-Mk1
+Starter-Mk2
+Sprinter - Desbloqueia o V.E.G.A (um rover robusto autonomo para buscar minérios)
+
+Rovers {
+    - SDS-90
+    - 
+    - V.E.G.A
+}
+
+Personagens:

@@ -1,0 +1,10 @@
+{
+    "nome": "Sprinter",
+    "aceleracao": "100",
+    "velocidade_max": "300",
+    "vida": "5000",
+    "velocidade_rotacao": "2",
+    "coeficiente_de_consumo": "4",
+    "escudo": "+200",
+    "armas": "false"
+}
