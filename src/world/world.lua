@@ -79,15 +79,21 @@ function World.checkPlanetProximity(playerX, playerY)
         if chunk.systemStar then
             local star = chunk.systemStar
             local dist = distancia(playerX, playerY, offX + star.x, offY + star.y)
-            if dist < star.radius + 80 then
-                return { name = "Estrela " .. star.name, type = "ESTRELA", explored = true }
+            if dist < star.radius + star.interactRange then
+                return {
+                    name = "Estrela " .. star.name,
+                    type = star.type,
+                    explored = true,
+                    seedAltitude = star.seedAltitude,
+                    seedHumidity = star.seedHumidity
+                }
             end
         end
 
         -- Checa planetas
         for _, planet in ipairs(chunk.planets) do
             local dist = distancia(playerX, playerY, offX + planet.x, offY + planet.y)
-            if dist < planet.radius + 60 then
+            if dist < planet.radius + planet.interactRange then
                 return planet
             end
         end
@@ -95,7 +101,7 @@ function World.checkPlanetProximity(playerX, playerY)
         -- Checa asteroides
         for _, ast in ipairs(chunk.asteroids) do
             local dist = distancia(playerX, playerY, offX + ast.x, offY + ast.y)
-            if dist < ast.radius + 40 then
+            if dist < ast.radius + ast.interactRange then
                 return ast
             end
         end
@@ -150,7 +156,7 @@ function World.checkStationProximity(playerX, playerY)
     return percorrerChunksProximos(playerX, playerY, function(chunk, offX, offY)
         for _, station in ipairs(chunk.stations) do
             local dist = distancia(playerX, playerY, offX + station.x, offY + station.y)
-            if dist < station.radius + 40 then
+            if dist < station.radius + station.interactRange then
                 return station
             end
         end
@@ -169,10 +175,10 @@ function World.draw(playerX, playerY)
         if chunk.systemStar then
             local s = chunk.systemStar
             -- Halo de luz ao redor da estrela
-            love.graphics.setColor(s.color[1], s.color[2], s.color[3], 0.25)
-            love.graphics.circle("fill", worldOffsetX + s.x, worldOffsetY + s.y, s.radius + 120)
-            love.graphics.setColor(s.color[1], s.color[2], s.color[3], 0.5)
-            love.graphics.circle("fill", worldOffsetX + s.x, worldOffsetY + s.y, s.radius + 50)
+            for _, halo in ipairs(s.halo or {}) do
+                love.graphics.setColor(s.color[1], s.color[2], s.color[3], halo.alpha)
+                love.graphics.circle("fill", worldOffsetX + s.x, worldOffsetY + s.y, s.radius + halo.extra)
+            end
             
             -- Núcleo da estrela
             love.graphics.setColor(s.color)
@@ -203,7 +209,7 @@ function World.draw(playerX, playerY)
 
         -- Asteroides Viajantes
         for _, ast in ipairs(chunk.asteroids) do
-            love.graphics.setColor(0.5, 0.5, 0.5)
+            love.graphics.setColor(ast.color)
             love.graphics.circle("fill", worldOffsetX + ast.x, worldOffsetY + ast.y, ast.radius)
             love.graphics.setColor(0.8, 0.8, 0.8)
             love.graphics.circle("line", worldOffsetX + ast.x, worldOffsetY + ast.y, ast.radius)

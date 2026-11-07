@@ -8,6 +8,25 @@ Config.window = {
     height = 768,
 }
 
+-- Parâmetros gerais do mundo. Planetas e asteroides vivem em assets/data/*.json
+Config.world = {
+    chunkSize = 2048,
+    seed = 1337,
+    stars = {                      -- Estrelas de fundo (decorativas)
+        quantidade = {60, 90},
+        tamanho = {1, 3},
+        brilho = {100, 255},       -- dividido por 255 ao gerar
+    },
+    stations = {                   -- Estações Espaciais
+        chance = 0.8,
+        raio = 35,
+        margem = 300,
+        prefixo = "Posto Orbital",
+        numero = {100, 999},
+        alcanceInteracao = 40,
+    },
+}
+
 Config.economy = {
     refuelCost = 30,        -- Preço do reabastecimento/reparo na estação
     scanRewardMoney = 150,  -- Créditos ao explorar um alvo pela primeira vez

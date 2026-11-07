@@ -1,0 +1,26 @@
+{
+  "geracao": {
+    "quantidade": [4, 8],
+    "margem": 200
+  },
+
+  "tipos": [
+    {
+      "tipo": "ASTEROIDE",
+      "peso": 1,
+      "raio": [40, 70],
+      "velocidade": [20, 60],
+      "cor": [0.5, 0.5, 0.5],
+      "prefixo": "Asteroide-Drifter",
+      "numero": [10, 99],
+      "alcanceInteracao": 40,
+      "superficie": {
+        "modo": "gradiente",
+        "base": 0.15,
+        "fator": 0.5,
+        "tinta": [0, 0, 0],
+        "nome": "Tons de cinza (metálico/rochoso)"
+      }
+    }
+  ]
+}

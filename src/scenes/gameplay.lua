@@ -26,7 +26,7 @@ end
 
 -- Chamado uma única vez, na primeira vez que a cena é usada
 function Gameplay.load()
-    Player.load()
+    Player.load(Session.data.shipModel)
     Camera.load()
     World.load()
 end

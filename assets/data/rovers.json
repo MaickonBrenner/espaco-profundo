@@ -1,15 +1,16 @@
-{
+[
+  {
     "nome": "V.E.G.A",
-    "aceleracao": "100",
-    "velocidade_max": "300",
-    "vida": "300",
-    "velocidade_rotacao": "2"
-} 
-
-{
+    "aceleracao": 100,
+    "velocidade_max": 300,
+    "vida": 300,
+    "velocidade_rotacao": 2
+  },
+  {
     "nome": "JOS 70-75",
-    "aceleracao": "100",
-    "velocidade_max": "300",
-    "vida": "300",
-    "velocidade_rotacao": "2"
-}
+    "aceleracao": 100,
+    "velocidade_max": 300,
+    "vida": 300,
+    "velocidade_rotacao": 2
+  }
+]

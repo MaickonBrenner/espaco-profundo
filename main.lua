@@ -1,8 +1,11 @@
 -- Ponto de entrada: só inicializa e delega para o gerenciador de cenas.
 local Session = require("src.core.session")
 local SceneManager = require("src.core.scene_manager")
+local DataLoader = require("src.core.data_loader")
 
 function love.load()
+    -- Carrega os JSONs logo de início: se algum estiver com erro, o jogo avisa na hora
+    DataLoader.preload({ "planetas", "asteroides", "naves" })
     Session.load()
     SceneManager.switch("menu")
 end

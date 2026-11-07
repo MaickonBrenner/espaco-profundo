@@ -1,0 +1,168 @@
+{
+  "geracao": {
+    "chance": 0.3,
+    "margem": 400,
+    "numero": [100, 999]
+  },
+
+  "fixos": [
+    {
+      "nome": "Khorus",
+      "tipo": "ESTRELA",
+      "chunk": { "x": 10, "y": -10 },
+      "posicao": { "x": 1024, "y": 1024 },
+      "raio": 280,
+      "cor": [1.0, 0.9, 0.2],
+      "bloqueiaPlanetas": true,
+      "seedAltitude": 777,
+      "seedHumidity": 313
+    },
+    {
+      "nome": "Karone",
+      "tipo": "PLANETOIDE",
+      "chunk": { "x": 8, "y": 7 },
+      "posicao": { "x": 1400, "y": 1200 },
+      "raio": 130,
+      "cor": [0.55, 0.5, 0.45],
+      "bloqueiaPlanetas": true,
+      "seedAltitude": 4242,
+      "seedHumidity": 1701
+    }
+  ],
+
+  "tipos": [
+    {
+      "tipo": "TERRA",
+      "categoria": "planeta",
+      "peso": 4,
+      "raio": [200, 350],
+      "cor": [0.1, 0.7, 0.2],
+      "alcanceInteracao": 60,
+      "superficie": {
+        "modo": "camadas",
+        "camadas": [
+          { "ate": 0.2, "cor": [0.1, 0.3, 0.7], "nome": "Pequenos lagos / oceanos rasos" },
+          { "ate": 0.3, "cor": [0.8, 0.75, 0.5], "nome": "Praias" },
+          { "ate": 0.6, "cor": [0.05, 0.5, 0.15], "nome": "Floresta densa verde-escura" },
+          { "ate": 0.8, "cor": [0.2, 0.7, 0.25], "nome": "Campos e colinas verdes" },
+          { "cor": [0.4, 0.4, 0.4], "nome": "Montanhas rochosas" }
+        ]
+      }
+    },
+    {
+      "tipo": "AGUA",
+      "categoria": "planeta",
+      "peso": 4,
+      "raio": [200, 350],
+      "cor": [0.05, 0.4, 0.9],
+      "alcanceInteracao": 60,
+      "superficie": {
+        "modo": "camadas",
+        "camadas": [
+          { "ate": 0.65, "cor": [0.02, 0.25, 0.75], "nome": "Oceano profundo e vasto" },
+          { "ate": 0.72, "cor": [0.1, 0.5, 0.9], "nome": "Oceano raso / Corais" },
+          { "ate": 0.85, "cor": [0.8, 0.75, 0.55], "nome": "Ilhas de areia / praias" },
+          { "cor": [0.35, 0.35, 0.35], "nome": "Cordilheiras de montanhas insulares" }
+        ]
+      }
+    },
+    {
+      "tipo": "MARTE",
+      "categoria": "planeta",
+      "peso": 22,
+      "raio": [200, 350],
+      "cor": [0.8, 0.3, 0.1],
+      "alcanceInteracao": 60,
+      "superficie": {
+        "modo": "camadas",
+        "camadas": [
+          { "ate": 0.3, "cor": [0.4, 0.15, 0.05], "nome": "Solo profundo escuro" },
+          { "ate": 0.75, "cor": [0.75, 0.35, 0.15], "nome": "Deserto de óxido de ferro" },
+          { "cor": [0.55, 0.25, 0.1], "nome": "Rochas altas de ferrugem" }
+        ]
+      }
+    },
+    {
+      "tipo": "VENUS",
+      "categoria": "planeta",
+      "peso": 25,
+      "raio": [200, 350],
+      "cor": [0.9, 0.7, 0.2],
+      "alcanceInteracao": 60,
+      "superficie": {
+        "modo": "camadas",
+        "camadas": [
+          { "ate": 0.35, "cor": [0.5, 0.3, 0.05], "nome": "Magma / Depressão sulfúrica" },
+          { "ate": 0.7, "cor": [0.8, 0.6, 0.1], "nome": "Planície amarela ácida" },
+          { "cor": [0.9, 0.8, 0.3], "nome": "Cratera vulcânica" }
+        ]
+      }
+    },
+    {
+      "tipo": "MERCURIO",
+      "categoria": "planeta",
+      "peso": 25,
+      "raio": [200, 350],
+      "cor": [0.5, 0.5, 0.5],
+      "alcanceInteracao": 60,
+      "superficie": {
+        "modo": "gradiente",
+        "base": 0.2,
+        "fator": 0.4,
+        "tinta": [0.05, 0, -0.05],
+        "nome": "Cinza com leve tom metálico"
+      }
+    },
+    {
+      "tipo": "PLUTAO",
+      "categoria": "planeta",
+      "peso": 20,
+      "raio": [200, 350],
+      "cor": [0.6, 0.8, 0.9],
+      "alcanceInteracao": 60,
+      "superficie": {
+        "modo": "camadas",
+        "camadas": [
+          { "ate": 0.4, "cor": [0.3, 0.4, 0.5], "nome": "Gelo escuro profundo" },
+          { "ate": 0.75, "cor": [0.6, 0.75, 0.85], "nome": "Planície congelada" },
+          { "cor": [0.9, 0.95, 1.0], "nome": "Pico de nitrogênio congelado" }
+        ]
+      }
+    },
+    {
+      "tipo": "PLANETOIDE",
+      "categoria": "planeta",
+      "peso": 0,
+      "raio": [100, 160],
+      "cor": [0.55, 0.5, 0.45],
+      "alcanceInteracao": 60,
+      "superficie": {
+        "modo": "camadas",
+        "camadas": [
+          { "ate": 0.35, "cor": [0.25, 0.25, 0.3], "nome": "Crateras escuras" },
+          { "ate": 0.7, "cor": [0.5, 0.45, 0.4], "nome": "Regolito" },
+          { "cor": [0.7, 0.65, 0.6], "nome": "Cumes rochosos" }
+        ]
+      }
+    },
+    {
+      "tipo": "ESTRELA",
+      "categoria": "estrela",
+      "peso": 0,
+      "raio": [250, 300],
+      "cor": [1.0, 0.9, 0.2],
+      "alcanceInteracao": 80,
+      "halo": [
+        { "extra": 120, "alpha": 0.25 },
+        { "extra": 50, "alpha": 0.5 }
+      ],
+      "superficie": {
+        "modo": "gradiente",
+        "base": 0.55,
+        "fator": 0.45,
+        "tinta": [0.45, 0, -0.45],
+        "nome": "Plasma incandescente"
+      }
+    }
+  ]
+}

@@ -1,11 +1,12 @@
+-- Gerador de chunks. Os dados (tipos, probabilidades, corpos fixos) vêm de
+-- assets/data/planetas.json e asteroides.json; parâmetros gerais vêm de src/config.lua.
+local Config = require("src.config")
+local Catalog = require("src.world.catalog")
+
 local Generator = {}
 
-Generator.chunkSize = 2048
-Generator.seed = 1337
-
--- Coordenadas de mundo onde a estrela Khorus está localizada (bem distante do ponto inicial 0,0)
-local KHORUS_CHUNK_X = 2
-local KHORUS_CHUNK_Y = -2
+Generator.chunkSize = Config.world.chunkSize
+Generator.seed = Config.world.seed
 
 local function hashCoordinates(cx, cy, seed)
     local h = seed + cx * 374761393 + cy * 668265263
@@ -14,23 +15,126 @@ local function hashCoordinates(cx, cy, seed)
     return math.abs(h % 1000000) / 1000000
 end
 
-local function escolherTipoPlaneta()
-    local r = math.random()
-    -- 5% de chance de ser um planeta Tipo Terra (Raríssimo)
-    if r < 0.04 then
-        return "TERRA", {0.1, 0.7, 0.2} -- Verde exuberante
-    -- 15% de chance de ser um Mundo de Água (Oceanos profundos com ilhas)
-    elseif r < 0.08 then
-        return "AGUA", {0.05, 0.4, 0.9} -- Azul oceânico forte
-    -- Demais chances divididas entre os inóspitos comuns
-    elseif r < 0.30 then
-        return "MARTE", {0.8, 0.3, 0.1} -- Ferrugem / Vermelho
-    elseif r < 0.55 then
-        return "VENUS", {0.9, 0.7, 0.2} -- Amarelo / Sulfúrico
-    elseif r < 0.80 then
-        return "MERCURIO", {0.5, 0.5, 0.5} -- Cinza Rochoso
+-- Sorteia um inteiro dentro de uma faixa {min, max} vinda do JSON
+local function sortear(faixa)
+    return math.random(faixa[1], faixa[2])
+end
+
+-- Sorteia um item de uma lista usando o campo "peso" (maior peso = mais provável).
+-- Lista com um único item não gasta sorteio.
+local function escolherPorPeso(lista)
+    if #lista == 1 then
+        return lista[1]
+    end
+
+    local total = 0
+    for _, def in ipairs(lista) do
+        total = total + (def.peso or 1)
+    end
+
+    local r = math.random() * total
+    local acumulado = 0
+    for _, def in ipairs(lista) do
+        acumulado = acumulado + (def.peso or 1)
+        if r < acumulado then
+            return def
+        end
+    end
+    return lista[#lista]
+end
+
+-- Valor do corpo fixo, com fallback para o que o tipo define
+local function valor(fixo, def, campo)
+    if fixo[campo] ~= nil then
+        return fixo[campo]
+    end
+    return def[campo]
+end
+
+-- Adiciona ao chunk um corpo de posição fixa (Khorus, Karone...). Não consome sorteios.
+local function adicionarCorpoFixo(chunkData, fixo)
+    local def = Catalog.getTipo(fixo.tipo)
+    assert(def, "Corpo fixo '" .. tostring(fixo.nome) .. "' usa tipo desconhecido: " .. tostring(fixo.tipo))
+    assert(type(fixo.raio) == "number", "Corpo fixo '" .. tostring(fixo.nome) .. "' precisa de um 'raio' numérico")
+
+    local corpo = {
+        x = fixo.posicao.x,
+        y = fixo.posicao.y,
+        radius = fixo.raio,
+        name = fixo.nome,
+        type = fixo.tipo,
+        color = valor(fixo, def, "cor"),
+        interactRange = valor(fixo, def, "alcanceInteracao") or 60,
+        seedAltitude = fixo.seedAltitude or 1,
+        seedHumidity = fixo.seedHumidity or 1,
+    }
+
+    if def.categoria == "estrela" then
+        corpo.halo = valor(fixo, def, "halo")
+        chunkData.systemStar = corpo -- Estrela central do sistema neste chunk
     else
-        return "PLUTAO", {0.6, 0.8, 0.9} -- Gélido / Azul claro
+        corpo.explored = false
+        corpo.fixed = true
+        table.insert(chunkData.planets, corpo)
+    end
+end
+
+local function gerarPlanetaAleatorio(chunkData)
+    local geracao = Catalog.planetas.geracao
+    local def = escolherPorPeso(Catalog.planetasSorteaveis)
+
+    local x = math.random(geracao.margem, Generator.chunkSize - geracao.margem)
+    local y = math.random(geracao.margem, Generator.chunkSize - geracao.margem)
+    local radius = sortear(def.raio)
+    local nome = (def.prefixo or def.tipo) .. "-" .. sortear(geracao.numero)
+    local seedAltitude = math.random(1, 9999)
+    local seedHumidity = math.random(1, 9999)
+
+    table.insert(chunkData.planets, {
+        x = x,
+        y = y,
+        radius = radius,
+        name = nome,
+        type = def.tipo,
+        color = def.cor,
+        interactRange = def.alcanceInteracao or 60,
+        seedAltitude = seedAltitude,
+        seedHumidity = seedHumidity,
+        explored = false
+    })
+end
+
+local function gerarAsteroides(chunkData)
+    local geracao = Catalog.asteroides.geracao
+    local margem = geracao.margem
+    local numAsteroids = sortear(geracao.quantidade)
+
+    for i = 1, numAsteroids do
+        local def = escolherPorPeso(Catalog.asteroides.tipos)
+
+        local angle = math.random() * math.pi * 2
+        local speed = sortear(def.velocidade)
+        local x = math.random(margem, Generator.chunkSize - margem)
+        local y = math.random(margem, Generator.chunkSize - margem)
+        local radius = sortear(def.raio)
+        local nome = def.prefixo .. " " .. sortear(def.numero)
+        local seedAltitude = math.random(1, 9999)
+        local seedHumidity = math.random(1, 9999)
+
+        table.insert(chunkData.asteroids, {
+            x = x,
+            y = y,
+            radius = radius,
+            vx = math.cos(angle) * speed,
+            vy = math.sin(angle) * speed,
+            name = nome,
+            type = def.tipo,
+            color = def.cor,
+            interactRange = def.alcanceInteracao or 40,
+            seedAltitude = seedAltitude,
+            seedHumidity = seedHumidity,
+            explored = false
+        })
     end
 end
 
@@ -46,74 +150,50 @@ function Generator.generateChunk(chunkX, chunkY)
     local localSeed = math.floor(hashCoordinates(chunkX, chunkY, Generator.seed) * 100000)
     math.randomseed(localSeed)
 
-    -- Se for o chunk exato da Estrela Khorus, injetamos ela no centro
-    if chunkX == KHORUS_CHUNK_X and chunkY == KHORUS_CHUNK_Y then
-        chunkData.systemStar = {
-            x = Generator.chunkSize / 2,
-            y = Generator.chunkSize / 2,
-            radius = 280, -- Gigantesca comparada aos planetas
-            name = "Khorus",
-            color = {1.0, 0.9, 0.2} -- Amarelo estelar brilhante
-        }
+    -- Corpos de posição fixa (Khorus, Karone...) definidos em planetas.json.
+    -- Para mudar o local, edite "chunk" e "posicao" no JSON.
+    local bloqueiaPlanetas = false
+    for _, fixo in ipairs(Catalog.planetas.fixos) do
+        if fixo.chunk.x == chunkX and fixo.chunk.y == chunkY then
+            adicionarCorpoFixo(chunkData, fixo)
+            if fixo.bloqueiaPlanetas then
+                bloqueiaPlanetas = true
+            end
+        end
     end
 
-    -- Estrelas
-    local numStars = math.random(60, 90)
+    -- Estrelas de fundo
+    local cfgStars = Config.world.stars
+    local numStars = sortear(cfgStars.quantidade)
     for i = 1, numStars do
         table.insert(chunkData.stars, {
             x = math.random(0, Generator.chunkSize),
             y = math.random(0, Generator.chunkSize),
-            size = math.random(1, 3),
-            brightness = math.random(100, 255) / 255
+            size = sortear(cfgStars.tamanho),
+            brightness = sortear(cfgStars.brilho) / 255
         })
     end
 
-    -- Planetas (Raros, com classes e cores baseadas no tipo)
-    -- Não geramos planetas no mesmo chunk exato da estrela para mantê-la soberana
-    if not (chunkX == KHORUS_CHUNK_X and chunkY == KHORUS_CHUNK_Y) and math.random() > 0.4 then
-        local tipo, corDominante = escolherTipoPlaneta()
-        table.insert(chunkData.planets, {
-            x = math.random(400, Generator.chunkSize - 400),
-            y = math.random(400, Generator.chunkSize - 400),
-            radius = math.random(200, 350),
-            name = tipo .. "-" .. math.random(100, 999),
-            type = tipo,
-            color = corDominante,
-            seedAltitude = math.random(1, 9999),
-            seedHumidity = math.random(1, 9999),
-            explored = false
-        })
+    -- Planetas (raros; tipo sorteado pelo "peso" de cada um em planetas.json)
+    -- Chunks com corpo fixo marcado como "bloqueiaPlanetas" não recebem planetas aleatórios
+    if not bloqueiaPlanetas and math.random() > 1 - Catalog.planetas.geracao.chance then
+        gerarPlanetaAleatorio(chunkData)
     end
 
     -- Estações Espaciais
-    if math.random() > 0.2 then
+    local cfgEst = Config.world.stations
+    if math.random() > 1 - cfgEst.chance then
         table.insert(chunkData.stations, {
-            x = math.random(300, Generator.chunkSize - 300),
-            y = math.random(300, Generator.chunkSize - 300),
-            radius = 35,
-            name = "Posto Orbital " .. math.random(100, 999)
+            x = math.random(cfgEst.margem, Generator.chunkSize - cfgEst.margem),
+            y = math.random(cfgEst.margem, Generator.chunkSize - cfgEst.margem),
+            radius = cfgEst.raio,
+            interactRange = cfgEst.alcanceInteracao,
+            name = cfgEst.prefixo .. " " .. sortear(cfgEst.numero)
         })
     end
 
     -- Asteroides Viajantes
-    local numAsteroids = math.random(4, 8)
-    for i = 1, numAsteroids do
-        local angle = math.random() * math.pi * 2
-        local speed = math.random(20, 60)
-        table.insert(chunkData.asteroids, {
-            x = math.random(200, Generator.chunkSize - 200),
-            y = math.random(200, Generator.chunkSize - 200),
-            radius = math.random(40, 70),
-            vx = math.cos(angle) * speed,
-            vy = math.sin(angle) * speed,
-            name = "Asteroide-Drifter " .. math.random(10, 99),
-            type = "ASTEROIDE",
-            color = {0.4, 0.4, 0.4},
-            seedAltitude = math.random(1, 9999),
-            seedHumidity = math.random(1, 9999),
-            explored = false
-        })
-    end
+    gerarAsteroides(chunkData)
 
     return chunkData
 end

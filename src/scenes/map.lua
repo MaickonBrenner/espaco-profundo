@@ -105,7 +105,7 @@ function Map.draw()
                 love.graphics.setColor(1, 0.9, 0.2)
                 love.graphics.circle("fill", drawX + (s.x * scale), drawY + (s.y * scale), 8)
                 love.graphics.setColor(1, 1, 1)
-                love.graphics.print("[ESTRELA KHORUS]", drawX + (s.x * scale) + 10, drawY + (s.y * scale) - 5)
+                love.graphics.print("[ESTRELA " .. string.upper(s.name) .. "]", drawX + (s.x * scale) + 10, drawY + (s.y * scale) - 5)
             end
 
             -- Asteroides no setor

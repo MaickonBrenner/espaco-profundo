@@ -1,5 +1,7 @@
 -- Cena: Scanner de superfície de planetas/asteroides (antigo estado "PLANET_SCANNER")
+-- As paletas de cores de cada tipo ficam em assets/data/planetas.json e asteroides.json
 local SceneManager = require("src.core.scene_manager")
+local Catalog = require("src.world.catalog")
 
 local Scanner = {}
 
@@ -33,8 +35,37 @@ function Scanner.enter(alvo)
     Scanner.load(alvo.seedAltitude, alvo.seedHumidity, alvo.type)
 end
 
+local function limitar(v)
+    return math.max(0, math.min(1, v))
+end
+
+-- Converte a altitude (0 a 1) numa cor usando a paleta do tipo.
+-- "camadas": a primeira camada cujo "ate" é maior que a altitude vence (sem "ate" = padrão).
+-- "gradiente": tom de cinza = base + altitude * fator, somado a uma "tinta" por canal.
+-- A umidade (hum) ainda não é usada por nenhuma paleta; fica disponível para camadas futuras.
+local function corDoBioma(superficie, alt, hum)
+    if not superficie then
+        return {1, 1, 1}
+    end
+
+    if superficie.modo == "gradiente" then
+        local tom = superficie.base + alt * superficie.fator
+        local tinta = superficie.tinta or {0, 0, 0}
+        return { limitar(tom + tinta[1]), limitar(tom + tinta[2]), limitar(tom + tinta[3]) }
+    end
+
+    for _, camada in ipairs(superficie.camadas) do
+        if not camada.ate or alt < camada.ate then
+            return camada.cor
+        end
+    end
+    return {1, 1, 1}
+end
+
 function Scanner.gerarSuperficie()
     mapaBiomas = {}
+
+    local superficie = Catalog.getSuperficie(Scanner.tipoAlvo)
     
     local offsetXAlt = Scanner.sementeAltitude % 1000
     local offsetYAlt = (Scanner.sementeAltitude / 2) % 1000
@@ -52,76 +83,7 @@ function Scanner.gerarSuperficie()
             local hy = (y + offsetYHum) / 40.0
             local hum = love.math.noise(hx, hy)
             
-            local cor = {1, 1, 1}
-
-            -- ASTEROIDE: Renderiza estritamente em tons de cinza (metálico/rochoso)
-            if Scanner.tipoAlvo == "ASTEROIDE" then
-                local tom = 0.15 + (alt * 0.5)
-                cor = {tom, tom, tom}
-
-            -- PLANETA TERRA (Super verde e florestal)
-            elseif Scanner.tipoAlvo == "TERRA" then
-                if alt < 0.2 then
-                    cor = {0.1, 0.3, 0.7} -- Pequenos lagos / oceanos rasos
-                elseif alt < 0.3 then
-                    cor = {0.8, 0.75, 0.5} -- Praias
-                elseif alt < 0.6 then
-                    cor = {0.05, 0.5, 0.15} -- Floresta densa verde-escura
-                elseif alt < 0.8 then
-                    cor = {0.2, 0.7, 0.25} -- Campos e colinas verdes
-                else
-                    cor = {0.4, 0.4, 0.4} -- Montanhas rochosas
-                end
-
-            -- PLANETA AGUA (Mundo oceânico com ilhas e montanhas)
-            elseif Scanner.tipoAlvo == "AGUA" then
-                if alt < 0.65 then
-                    cor = {0.02, 0.25, 0.75} -- Oceano profundo e vasto
-                elseif alt < 0.72 then
-                    cor = {0.1, 0.5, 0.9} -- Oceano raso / Corais
-                elseif alt < 0.85 then
-                    cor = {0.8, 0.75, 0.55} -- Ilhas de areia / praias
-                else
-                    cor = {0.35, 0.35, 0.35} -- Cordilheiras de montanhas insulares
-                end
-
-            -- PLANETA MARTE: Deserto ferrugem, crateras escuras e desfiladeiros
-            elseif Scanner.tipoAlvo == "MARTE" then
-                if alt < 0.3 then
-                    cor = {0.4, 0.15, 0.05} -- Solo profundo escuro
-                elseif alt < 0.75 then
-                    cor = {0.75, 0.35, 0.15} -- Deserto de óxido de ferro
-                else
-                    cor = {0.55, 0.25, 0.1} -- Rochas altas de ferrugem
-                end
-
-            -- PLANETA VÊNUS: Vales sulfúricos e vulcânicos quentes
-            elseif Scanner.tipoAlvo == "VENUS" then
-                if alt < 0.35 then
-                    cor = {0.5, 0.3, 0.05} -- Magma / Depressão sulfúrica
-                elseif alt < 0.7 then
-                    cor = {0.8, 0.6, 0.1} -- Planície amarela ácida
-                else
-                    cor = {0.9, 0.8, 0.3} -- Cratera vulcânica
-                end
-
-            -- PLANETA MERCÚRIO: Crateras densas e cinza escuro rochoso
-            elseif Scanner.tipoAlvo == "MERCURIO" then
-                local tom = 0.2 + (alt * 0.4)
-                cor = {tom + 0.05, tom, tom - 0.05} -- Cinza com leve tom metálico
-
-            -- PLANETA PLUTÃO: Gelo nitrogenado e planícies gélidas
-            elseif Scanner.tipoAlvo == "PLUTAO" then
-                if alt < 0.4 then
-                    cor = {0.3, 0.4, 0.5} -- Gelo escuro profundo
-                elseif alt < 0.75 then
-                    cor = {0.6, 0.75, 0.85} -- Planície congelada
-                else
-                    cor = {0.9, 0.95, 1.0} -- Pico de nitrogênio congelado
-                end
-            end
-            
-            mapaBiomas[y][x] = cor
+            mapaBiomas[y][x] = corDoBioma(superficie, alt, hum)
         end
     end
 end
